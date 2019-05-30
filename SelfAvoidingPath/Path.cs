@@ -67,6 +67,41 @@ namespace SelfAvoidingPath
             return true;
         }
 
+        public bool CheckIfPathIsSelfAvoiding()
+        {
+            foreach (char direction in walkDirections)
+            {
+                switch (direction)
+                {
+                    case 'N':// 0
+                        currentPosition.Y++;
+                        break;
+                    case 'E':// 1
+                        currentPosition.X++;
+                        break;
+                    case 'S':// 2
+                        currentPosition.Y--;
+                        break;
+                    case 'W':// 3
+                        currentPosition.X--;
+                        break;
+                }
+
+                if (visitedPoints.Contains(currentPosition))
+                {
+                    return false;
+                }
+                visitedPoints.Add(new Point(currentPosition.X, currentPosition.Y));
+            }
+
+            if (visitedPoints.Count != visitedPoints.Distinct().Count())
+            {
+                return false;
+            }
+            return true;
+        }
+
+
         public void MakeMove(char direction)
         {
             //if (visitedPoints.Contains(currentPosition))
@@ -104,6 +139,26 @@ namespace SelfAvoidingPath
             visitedPoints.Add(new Point(currentPosition.X, currentPosition.Y));
         }
 
+        public void MakeFakeMove(char direction)
+        {
+            switch (direction)
+            {
+                case 'N':// 0
+                    blockedMoveDirection = 2;// 'S';
+                    break;
+                case 'E':// 1
+                    blockedMoveDirection = 3;// 'W';
+                    break;
+                case 'S':// 2
+                    blockedMoveDirection = 0;// 'N';
+                    break;
+                case 'W':// 3
+                    blockedMoveDirection = 1;// 'E';
+                    break;
+            }
+            walkDirections += direction;
+        }
+
         public void MakeNMoves(int n)
         {
             for (int i = 0; i < n; i++)
@@ -128,6 +183,35 @@ namespace SelfAvoidingPath
                         break;
                     case 3:
                         MakeMove('W');
+                        break;
+                }
+            }
+        }
+
+        public void MakeNFakeMoves(int n)
+        {
+            for (int i = 0; i < n; i++)
+            {
+                int intDirection;
+                do
+                {
+                    intDirection = randomGenerator.Next(0, 4);
+                } while (intDirection == blockedMoveDirection);
+
+
+                switch (intDirection)
+                {
+                    case 0:
+                        MakeFakeMove('N');
+                        break;
+                    case 1:
+                        MakeFakeMove('E');
+                        break;
+                    case 2:
+                        MakeFakeMove('S');
+                        break;
+                    case 3:
+                        MakeFakeMove('W');
                         break;
                 }
             }

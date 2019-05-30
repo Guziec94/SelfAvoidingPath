@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace SelfAvoidingPath
@@ -10,7 +11,7 @@ namespace SelfAvoidingPath
     class Program
     {
         public static int n;
-        public static int maxPathsToFound = 15000;
+        public static int maxPathsToFound = 10000;
         static void Main(string[] args)
         {
             string consoleInput = "";
@@ -24,8 +25,8 @@ namespace SelfAvoidingPath
                 }
                 else if(int.TryParse(consoleInput, out n) && n > 0)
                 {
-                    int allPathsCount = 4 * (int)Math.Pow(3, n - 1);
-                    int sapCount = 0;
+                    long allPathsCount = 4 * (long)Math.Pow(3, n - 1);
+                    long sapCount = 0;
                     double sapFoundRatio;
                     bool shouldApproximate;
 
@@ -39,7 +40,7 @@ namespace SelfAvoidingPath
                     {
                         List<Path> foundPaths = new List<Path>();
                         shouldApproximate = maxPathsToFound < allPathsCount / 4;
-                        int localPathsToFound = shouldApproximate 
+                        long localPathsToFound = shouldApproximate 
                             ? maxPathsToFound 
                             : allPathsCount / 4;
 
@@ -49,8 +50,8 @@ namespace SelfAvoidingPath
                             while (!pathSuccesfullyCreated)
                             {
                                 Path randomPath = new Path(n);
-                                randomPath.MakeMove('N');
-                                randomPath.MakeNMoves(n - 1);
+                                randomPath.MakeFakeMove('N');
+                                randomPath.MakeNFakeMoves(n - 1);
                                 if (!foundPaths.Contains(randomPath, Comparers.PathComparer))
                                 {
                                     pathSuccesfullyCreated = true;
@@ -59,18 +60,26 @@ namespace SelfAvoidingPath
                             }
                         }
 
-                        foreach (var randomlyGeneratedPath in foundPaths)
+                        //foreach (var randomlyGeneratedPath in foundPaths)
+                        //{
+                        //    if (randomlyGeneratedPath.CheckIfPathIsSelfAvoiding())
+                        //    {
+                        //        sapCount++;
+                        //    }
+                        //}
+
+                        Parallel.ForEach(foundPaths, (randomlyGeneratedPath) =>
                         {
-                            if (randomlyGeneratedPath.QuickCheckIfPathIsSelfAvoiding())
+                            if (randomlyGeneratedPath.CheckIfPathIsSelfAvoiding())
                             {
-                                sapCount++;
+                                Interlocked.Increment(ref sapCount);
                             }
-                        }
+                        });
 
                         if (shouldApproximate)
                         {
                             sapFoundRatio = (sapCount / (double)foundPaths.Count);
-                            sapCount = (int)(allPathsCount * sapFoundRatio);
+                            sapCount = (long)(allPathsCount * sapFoundRatio);
                         }
                         else
                         {

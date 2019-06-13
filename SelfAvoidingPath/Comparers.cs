@@ -9,7 +9,6 @@ namespace SelfAvoidingPath
     {
         public static PathComparer PathComparer = new PathComparer();
     }
-    
 
     internal class PathComparer : IEqualityComparer<Path>
     {

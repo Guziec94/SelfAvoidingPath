@@ -5,6 +5,7 @@ using System.Numerics;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Windows;
 
 namespace SelfAvoidingPath
 {
@@ -19,11 +20,11 @@ namespace SelfAvoidingPath
             {
                 Console.Write("\n\nDługość szukanych ścieżek: ");
                 consoleInput = Console.ReadLine();
-                if(consoleInput.ToUpper() == "EXIT")
+                if (consoleInput.ToUpper() == "EXIT")
                 {
                     break;
                 }
-                else if(int.TryParse(consoleInput, out n) && n > 0)
+                else if (int.TryParse(consoleInput, out n) && n > 0)
                 {
                     long allPathsCount = 4 * (long)Math.Pow(3, n - 1);
                     long sapCount = 0;
@@ -40,37 +41,45 @@ namespace SelfAvoidingPath
                     {
                         List<Path> foundPaths = new List<Path>();
                         shouldApproximate = maxPathsToFound < allPathsCount / 4;
-                        long localPathsToFound = shouldApproximate 
-                            ? maxPathsToFound 
+                        long localPathsToFound = shouldApproximate
+                            ? maxPathsToFound
                             : allPathsCount / 4;
 
                         while (foundPaths.Count < localPathsToFound)
-                        { 
+                        {
                             bool pathSuccesfullyCreated = false;
+                            Path randomPath = new Path(n);
                             while (!pathSuccesfullyCreated)
                             {
-                                Path randomPath = new Path(n);
-                                randomPath.MakeFakeMove('N');
-                                randomPath.MakeNFakeMoves(n - 1);
+                                //randomPath.MakeFakeMove('N');
+                                //randomPath.MakeNFakeMoves(n - 1);
+                                randomPath.MakeMove('N');
+                                randomPath.MakeNMoves(n - 1);
                                 if (!foundPaths.Contains(randomPath, Comparers.PathComparer))
                                 {
                                     pathSuccesfullyCreated = true;
                                     foundPaths.Add(randomPath);
                                 }
+                                else
+                                {
+                                    randomPath.walkDirections = "";
+                                    randomPath.visitedPoints = new List<Point>(n + 1) { new Point(0, 0) };
+                                    randomPath.currentPosition = new Point(0, 0);
+                                }
                             }
                         }
 
-                        //foreach (var randomlyGeneratedPath in foundPaths)
+                        //Parallel.ForEach(foundPaths, (randomlyGeneratedPath) =>
                         //{
                         //    if (randomlyGeneratedPath.CheckIfPathIsSelfAvoiding())
                         //    {
-                        //        sapCount++;
+                        //        Interlocked.Increment(ref sapCount);
                         //    }
-                        //}
+                        //});
 
                         Parallel.ForEach(foundPaths, (randomlyGeneratedPath) =>
                         {
-                            if (randomlyGeneratedPath.CheckIfPathIsSelfAvoiding())
+                            if (randomlyGeneratedPath.QuickCheckIfPathIsSelfAvoiding())
                             {
                                 Interlocked.Increment(ref sapCount);
                             }

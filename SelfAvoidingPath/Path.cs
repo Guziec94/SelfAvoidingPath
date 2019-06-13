@@ -40,7 +40,7 @@ namespace SelfAvoidingPath
 
         public bool QuickCheckIfPathIsSelfAvoiding()
         {
-            if(visitedPoints.Count != visitedPoints.Distinct().Count())
+            if (visitedPoints.Count != visitedPoints.Distinct().Count())
             {
                 return false;
             }
